@@ -1,11 +1,7 @@
-import { rename, existsSync, readdirSync, lstatSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { rename, existsSync, readdirSync, lstatSync, mkdirSync } from "fs";
+import { join } from "path";
 
-function moveFiles(
-  oldPath: string,
-  newPath: string,
-  callback: (value: string) => void
-) {
+function moveFiles(oldPath, newPath, callback) {
   if (!oldPath) return;
   if (!newPath) return;
 
@@ -20,11 +16,7 @@ function moveFiles(
 }
 // moveFiles()
 
-function fromDir(
-  startPath: string,
-  filter: RegExp,
-  callback: (filename: string) => void
-) {
+function fromDir(startPath, filter, callback) {
   //console.log('Starting from dir '+startPath+'/');
 
   if (!existsSync(startPath)) {
@@ -33,15 +25,15 @@ function fromDir(
   }
 
   const files = readdirSync(startPath);
-  for (let i = 0; i < files.length; i++) {
-    const filename = join(startPath, files[i]);
+  files.forEach((file) => {
+    const filename = join(startPath, file);
     const stat = lstatSync(filename);
     if (stat.isDirectory()) {
       //   fromDir(filename, filter, callback); //recurse
       return;
     }
     if (filter.test(filename)) callback(filename);
-  }
+  });
 }
 
 const fileExtensions = [
@@ -95,7 +87,7 @@ const fileExtensions = [
 ];
 
 fileExtensions.forEach(([extension, folder]) => {
-  fromDir("./", extension as RegExp, function (filename) {
+  fromDir("./", extension, function (filename) {
     // console.log("-- found: ", filename);
     try {
       mkdirSync(new URL(`./${folder}`, import.meta.url));

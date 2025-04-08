@@ -1,7 +1,11 @@
-import { rename, existsSync, readdirSync, lstatSync, mkdirSync } from "fs";
-import { join } from "path";
+import { rename, existsSync, readdirSync, lstatSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
-function moveFiles(oldPath, newPath, callback) {
+function moveFiles(
+  oldPath: string,
+  newPath: string,
+  callback: (value: string) => void
+) {
   if (!oldPath) return;
   if (!newPath) return;
 
@@ -16,7 +20,11 @@ function moveFiles(oldPath, newPath, callback) {
 }
 // moveFiles()
 
-function fromDir(startPath, filter, callback) {
+function fromDir(
+  startPath: string,
+  filter: RegExp,
+  callback: (filename: string) => void
+) {
   //console.log('Starting from dir '+startPath+'/');
 
   if (!existsSync(startPath)) {
@@ -24,16 +32,16 @@ function fromDir(startPath, filter, callback) {
     return;
   }
 
-  var files = readdirSync(startPath);
-  for (var i = 0; i < files.length; i++) {
-    var filename = join(startPath, files[i]);
-    var stat = lstatSync(filename);
+  const files = readdirSync(startPath);
+  files.forEach((file) => {
+    const filename = join(startPath, file);
+    const stat = lstatSync(filename);
     if (stat.isDirectory()) {
       //   fromDir(filename, filter, callback); //recurse
       return;
     }
     if (filter.test(filename)) callback(filename);
-  }
+  });
 }
 
 const fileExtensions = [
@@ -87,11 +95,13 @@ const fileExtensions = [
 ];
 
 fileExtensions.forEach(([extension, folder]) => {
-  fromDir("./", extension, function (filename) {
+  fromDir("./", extension as RegExp, async (filename) => {
     // console.log("-- found: ", filename);
     try {
       mkdirSync(new URL(`./${folder}`, import.meta.url));
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
 
     const oldPath = `./${filename}`;
     const newPath = `./${folder}/${filename}`;
@@ -100,3 +110,4 @@ fileExtensions.forEach(([extension, folder]) => {
     });
   });
 });
+

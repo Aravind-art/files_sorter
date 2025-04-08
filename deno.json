@@ -1,7 +1,8 @@
 {
   "version": "0.0.1",
+  
   "tasks": {
-    "dev": "deno run --watch main.ts",
-    "build": "deno compile --allow-read --output file.sorter main.ts"
+    "dev": "deno run --watch src/main.ts",
+    "build": "deno compile --allow-write --allow-read --output file.sorter src/main.ts"
   }
 }
